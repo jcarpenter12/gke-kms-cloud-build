@@ -1,0 +1,18 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/hello-world-flask', '.' ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/hello-world-flask']
+- name: 'bash'
+  args: ['sed', '-i', 's/@@IMAGE_NAME@@/gcr.io\/$PROJECT_ID\/hello-world-flask/g', 'k8s/deployment.yaml']
+- name: "gcr.io/cloud-builders/gke-deploy"
+  args:
+  - 'run'
+  - '--filename'
+  - 'k8s/deployment.yaml'
+  - '--image'
+  - 'gcr.io/$PROJECT_ID/hello-world-flask'
+  - '--location'
+  - 'europe-west2'
+  - '--cluster'
+  - 'default-cluster'
